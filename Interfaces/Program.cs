@@ -1,33 +1,81 @@
 ﻿using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
-interface IWhat { 
-    void DoAction(Player player); 
+interface IPlayerState
+{ 
+    void Enter(Player context); // Player Entering?
+    void Act(Player context);   // Player Action
+    void Exit(Player context); // Player Exit?
+
 }
 class Player
 {
-    public string state;
+    protected IPlayerState state;
+    public Player()
+    {
+        state = new Idle();
+        state.Enter(this);
+    }
+    public void DoAction()
+    {
+        state.Act(this);   
+    }
+    private void Switch(IPlayerState next)
+    {
+        if (state != null)
+        {
+            state.Exit(this); // 1. Switch Current State
+        }
+        state = next;        // 2. Set New State
+        state.Enter(this);   // 3. Enter New State
+    }
+    public void SetState(IPlayerState next) { 
+    Switch(next);
+    }
+    
+
 }
 
-class Idle : IWhat
+class Idle : IPlayerState
 {
-    public void DoAction(Player player)
+    public void Enter(Player context)
     {
-
-        player.state = "Warten";
+        Console.WriteLine("Enter Idle");
+    }
+    public void Act(Player context)
+    {
+        Console.WriteLine("Player does nothing");
+    }
+    public void Exit(Player context)
+    {
+        
     }
 }
-class Attack : IWhat
+class Attack : IPlayerState
 {
-    public void DoAction(Player player)
+    public void Enter(Player context)
     {
-        player.state = "Angreifen";
+        Console.WriteLine("Enter Idle");
+    }
+    public void Act(Player context)
+    { 
+        Console.WriteLine("Player Strikes");
+    }
+    public void Exit( Player context) { 
     }
 }
-class Dead : IWhat
+class Dead : IPlayerState
 {
-    public void DoAction(Player player)
+    public void Enter(Player context)
     {
-        player.state = "Tot";
+        context.SetState(this);
+    }
+    public void Act( Player context)
+    {
+        Console.WriteLine("Player Dies");
+    }
+    public void Exit(Player context) 
+    {
+        
     }
 }
 class Program
@@ -35,19 +83,23 @@ class Program
     public static void Main()
     {
         // Wir können Instanzen der Klassen erstellen und die Methode aufrufen
+        // Wir erstellen eine Instanz des Players.
         Player player = new Player();
 
-        IWhat idleState = new Idle();
-        idleState.DoAction(player);
-        Console.WriteLine(player.state);
+        // Der Spieler ist im Idle-Zustand, also rufen wir seine Aktion auf.
+        player.DoAction();
 
-        IWhat attackState = new Attack();
-        attackState.DoAction(player);
-        Console.WriteLine(player.state);
-        
-        
-        IWhat deadState = new Dead();
-        deadState.DoAction(player);
-        Console.WriteLine(player.state);
+        // Jetzt ändern wir den Zustand des Spielers auf "Attack".
+        player.SetState(new Attack());
+
+        // Jetzt rufen wir seine neue Aktion auf.
+        player.DoAction();
+
+        // Und jetzt ändern wir den Zustand des Spielers auf "Dead".
+        player.SetState(new Dead());
+
+        // Und rufen seine letzte Aktion auf.
+        player.DoAction();
+
     }
 }
