@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
+﻿using System;
 interface IPlayerState
 { 
     void Enter(Player context); // Player Entering?
@@ -39,7 +38,7 @@ class Idle : IPlayerState
 {
     public void Enter(Player context)
     {
-        Console.WriteLine("Enter Idle");
+        Console.WriteLine("Enter IdleState");
     }
     public void Act(Player context)
     {
@@ -47,27 +46,30 @@ class Idle : IPlayerState
     }
     public void Exit(Player context)
     {
-        
+        Console.WriteLine("Exit IdleState");
     }
 }
 class Attack : IPlayerState
 {
     public void Enter(Player context)
     {
-        Console.WriteLine("Enter Idle");
+        Console.WriteLine("Enter AttackState");
     }
     public void Act(Player context)
     { 
         Console.WriteLine("Player Strikes");
+        context.SetState(new Idle());
     }
-    public void Exit( Player context) { 
+    public void Exit( Player context) 
+    {
+        Console.WriteLine("Exit AttackState");
     }
 }
 class Dead : IPlayerState
 {
     public void Enter(Player context)
     {
-        context.SetState(this);
+        Console.WriteLine("Enter DeadState");
     }
     public void Act( Player context)
     {
@@ -75,7 +77,7 @@ class Dead : IPlayerState
     }
     public void Exit(Player context) 
     {
-        
+        Console.WriteLine("Exit DeadState");
     }
 }
 class Program
@@ -85,7 +87,7 @@ class Program
         // Wir können Instanzen der Klassen erstellen und die Methode aufrufen
         // Wir erstellen eine Instanz des Players.
         Player player = new Player();
-
+        
         // Der Spieler ist im Idle-Zustand, also rufen wir seine Aktion auf.
         player.DoAction();
 
